@@ -1,0 +1,23 @@
+PROJECT(test C)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
+
+FIND_PACKAGE(PkgConfig)
+
+PKG_SEARCH_MODULE(GLIB REQUIRED glib-2.0)
+
+SET(CMAKE_C_FLAGS,"-Os -Wall -g")
+
+include_directories (
+        ${GLIB_INCLUDE_DIRS}
+)
+
+ADD_EXECUTABLE(keybtest keyb.c db.c gpio.c)
+
+TARGET_LINK_LIBRARIES(keybtest ${GLIB_LIBRARIES})
+
+INSTALL(TARGETS keybtest RUNTIME DESTINATION bin)
+
+INCLUDE(CPack)
+
+
