@@ -173,7 +173,7 @@ int main(void)
 		fprintf(stderr, "Failed to open log file '%s' for appending\n", LOG_FILE_PATH);
 		return EXIT_FAILURE;
 	}
-	flogger(log_file, "Started (build %s %s)", __DATE__, __TIME__);
+	flogger(log_file, "Started (build %s %s)\n", __DATE__, __TIME__);
 	
 	/*
 	// Drop root privileges
