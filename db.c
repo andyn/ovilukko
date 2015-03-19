@@ -124,3 +124,12 @@ int db_check_rfid_pin(GHashTable *db,guint64 rfid,const char *pin) {
 	return entry->res;
 }
 
+/**
+ * Get an entry from the RFID database by account ID
+ * \param db Database to fetch from
+ * \param rfid ID of account
+ * \return Pointer to DB entry or NULL if not found. */
+struct dbentry *db_get_entry(GHashTable *db, guint64 rfid) {
+	return g_hash_table_lookup(db, &rfid);
+}
+
