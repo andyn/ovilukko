@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -136,7 +137,9 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 			// If code not yet ready, continue.
 			if (rfid == 0) continue;
 			if (db_check_rfid(db,rfid) == RES_PASS) {
-				flogger(log_file, "Accepted ID %llu\n", rfid);
+				struct dbentry *entry = db_get_entry(db, rfid);
+				assert(entry);
+				flogger(log_file, "Accepted ID %llu (%s)\n", rfid, entry->name);
 				logger(COLOR_GREEN "Accepted ID %llu\n" COLOR_OFF, rfid);
 				GPIOWrite(RELAY_PIN,HIGH);
 				sleep(5);
