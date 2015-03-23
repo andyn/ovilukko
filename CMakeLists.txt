@@ -6,7 +6,7 @@ FIND_PACKAGE(PkgConfig)
 
 PKG_SEARCH_MODULE(GLIB REQUIRED glib-2.0)
 
-SET(CMAKE_C_FLAGS,"-Os -Wall -g")
+SET(CMAKE_C_FLAGS,"-Os -Wall -Wextra -pedantic -g")
 
 include_directories (
         ${GLIB_INCLUDE_DIRS}
