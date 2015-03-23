@@ -6,7 +6,8 @@
 
 void db_entry_free(gpointer ptr) {
 	struct dbentry *entry = ptr;
-	g_free(entry->name);
+	g_free(entry->full_name);
+	g_free(entry->nickname);
 	g_free(entry->pin);
 	g_free(entry);
 }
@@ -41,7 +42,7 @@ int db_read(GHashTable *db, const char *path) {
 	while ((id = ids[i++]) != NULL) {
 		gchar *paramstr = g_key_file_get_string(keyfile,"RFID",id,NULL);
 		if (paramstr == NULL) continue;
-		gchar **fields = g_strsplit(paramstr,",",3);
+		gchar **fields = g_strsplit(paramstr,",",4);
 		if (fields == NULL) {
 			g_free(paramstr);
 			continue;
@@ -55,12 +56,18 @@ int db_read(GHashTable *db, const char *path) {
 		entry->rfid = g_ascii_strtoull(id,NULL,10);
 		entry->res = g_ascii_strtoull(fields[0],NULL,10);
 		if (entry->res != RES_PASS) entry->res = RES_FAIL;
-		entry->name = entry->pin = NULL;
+		entry->full_name = NULL;
+		entry->nickname = NULL;
+		entry->pin = NULL;
+
 		if (fields[1] != NULL) {
 			entry->pin = g_strdup(fields[1]);
-			if (fields[2] != NULL) {
-				entry->name = g_strdup(fields[2]);
-			}
+		}
+		if (fields[2] != NULL) {
+			entry->full_name = g_strdup(fields[2]);
+		}
+		if (fields[3] != NULL) {
+			entry->nickname = g_strdup(fields[3]);
 		}
 		if (entry->rfid == 0) {
 			db_entry_free(entry);
@@ -68,6 +75,7 @@ int db_read(GHashTable *db, const char *path) {
 			g_free(paramstr);
 			continue;
 		}
+
 		// Insert entry into the hashtable.
 		g_hash_table_replace(db,&entry->rfid,entry);
 	}

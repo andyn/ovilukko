@@ -4,7 +4,8 @@
 struct dbentry {
 	guint64 rfid;
 	char *pin;
-	char *name;
+	char *full_name;
+	char *nickname;
 	int res;
 };
 

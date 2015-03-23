@@ -139,8 +139,8 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 			if (db_check_rfid(db,rfid) == RES_PASS) {
 				struct dbentry *entry = db_get_entry(db, rfid);
 				assert(entry);
-				flogger(log_file, "Accepted ID %llu (%s)\n", rfid, entry->name);
-				logger(COLOR_GREEN "Accepted ID %llu (%s)\n" COLOR_OFF, rfid, entry->name);
+				flogger(log_file, "Accepted ID %llu (%s, %s)\n", rfid, entry->full_name, entry->nickname);
+				logger(COLOR_GREEN "Accepted ID %llu (%s, %s)\n" COLOR_OFF, rfid, entry->full_name, entry->nickname);
 				GPIOWrite(RELAY_PIN,HIGH);
 				sleep(5);
 				GPIOWrite(RELAY_PIN,LOW);
