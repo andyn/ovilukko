@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <linux/input.h>
+#include <signal.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -23,6 +24,8 @@
 #define GID_NOGROUP 65534
 #define UID_NOBODY 65534
 
+// For random small buffers
+#define ENOUGH 128
 
 /**
  * Read RFID number from input device at FD.
@@ -87,6 +90,8 @@ const char *dev = "/dev/input/by-id/usb-GASIA_PS2toUSB_Adapter-event-kbd";
 /** RFID database file. */
 const char *dbfile = "rfid.ini";
 
+/** Named pipe for outputting the person who opened the door */
+const char *pipefile = "/tmp/ovi.pipe";
 
 /**
  * Loop to read from keypad and test detected RFID validity.
@@ -102,9 +107,14 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 
 	// Get exclusive access.
 	if (ioctl(rfid_fd,EVIOCGRAB,1) != 0) {
-		fprintf(stderr,"Failed to get exclusive access to device\n");
+		fprintf(stderr, "Failed to get exclusive access to device\n");
 	}
 
+	signal(SIGPIPE, SIG_IGN);
+	if (mkfifo(pipefile, 0660) == -1 && errno != EEXIST) {
+		fprintf(stderr, "Could not create named pipe %s\n", pipefile);
+	}
+	
 	while (1) {
 		fd_set fdread;
 		fd_set fderr;
@@ -139,11 +149,26 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 			if (db_check_rfid(db,rfid) == RES_PASS) {
 				struct dbentry *entry = db_get_entry(db, rfid);
 				assert(entry);
+
+				// Log to console
 				flogger(log_file, "Accepted ID %llu (%s, %s)\n", rfid, entry->full_name, entry->nickname);
 				logger(COLOR_GREEN "Accepted ID %llu (%s, %s)\n" COLOR_OFF, rfid, entry->full_name, entry->nickname);
+
+				// Send user id to pipe
+				int pipe_fd = open(pipefile, O_WRONLY | O_NONBLOCK);
+				if (pipe_fd != -1) {
+					char name_buffer[ENOUGH];
+					size_t name_length = snprintf(name_buffer, sizeof name_buffer, "%s\n", entry->nickname);
+					write(pipe_fd, name_buffer, name_length + 1);
+					while (close(pipe_fd) == -1 && errno == EINTR)
+						;
+				}
+	
+				// Open the latch
 				GPIOWrite(RELAY_PIN,HIGH);
 				sleep(5);
 				GPIOWrite(RELAY_PIN,LOW);
+
 			} else {
 				flogger(log_file, "Unknown ID %llu\n", rfid);
 				logger(COLOR_RED "Unknown ID %llu\n" COLOR_OFF, rfid);
