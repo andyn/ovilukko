@@ -159,7 +159,7 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 				if (pipe_fd != -1) {
 					char name_buffer[ENOUGH];
 					size_t name_length = snprintf(name_buffer, sizeof name_buffer, "%s\n", entry->nickname);
-					write(pipe_fd, name_buffer, name_length + 1);
+					write(pipe_fd, name_buffer, name_length);
 					while (close(pipe_fd) == -1 && errno == EINTR)
 						;
 				}
