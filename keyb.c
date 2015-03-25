@@ -151,8 +151,8 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 				assert(entry);
 
 				// Log to console
-				flogger(log_file, "Accepted ID %llu (%s, %s)\n", rfid, entry->full_name, entry->nickname);
-				logger(COLOR_GREEN "Accepted ID %llu (%s, %s)\n" COLOR_OFF, rfid, entry->full_name, entry->nickname);
+				flogger(log_file, "Accepted ID from %s / %s\n", entry->full_name, entry->nickname);
+				logger(COLOR_GREEN "Accepted ID from %s / %s\n" COLOR_OFF, entry->full_name, entry->nickname);
 
 				// Send user id to pipe
 				int pipe_fd = open(pipefile, O_WRONLY | O_NONBLOCK);
