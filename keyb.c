@@ -107,7 +107,11 @@ void rfid_loop(GHashTable *db, FILE *log_file) {
 
 	// Get exclusive access.
 	if (ioctl(rfid_fd,EVIOCGRAB,1) != 0) {
-		fprintf(stderr, "Failed to get exclusive access to device\n");
+		fprintf(stderr,
+		        "Failed to get exclusive access to device '%s'.\n"
+		             "Is another instance of this program running?\n",
+		        dev);
+		return;
 	}
 
 	signal(SIGPIPE, SIG_IGN);
